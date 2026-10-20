@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>故障演练页 · 单摆 v0.3（含 Bug）</title>
+<title>故障演练页 · 单摆 v0.4（已修复）</title>
 <style>
   :root { color-scheme: dark; }
   * { box-sizing: border-box; }
@@ -27,12 +27,12 @@
 </head>
 <body>
   <div class="wrap">
-    <h1>故障演练 · 单摆 v0.3</h1>
-    <p class="hint">按 F12 打开 Console，然后点击「重置摆动」复现运行时错误。</p>
+    <h1>故障演练 · 单摆 v0.4</h1>
+    <p class="hint">已修复作用域缺陷：按 F12 打开 Console，点击「重置摆动」应无红色报错。</p>
     <canvas id="scene"></canvas>
     <div class="bar">
-      <button id="resetBtn" onclick="resetAnimation()">重置摆动</button>
-      <button class="ghost" id="pauseBtn" onclick="togglePause()">暂停</button>
+      <button id="resetBtn" type="button">重置摆动</button>
+      <button class="ghost" id="pauseBtn" type="button">暂停</button>
     </div>
   </div>
 
@@ -129,6 +129,12 @@
       omega = 0;
       lastTime = 0;
     }
+
+    // 历史 Bug：按钮曾使用 onclick="resetAnimation()"，而行内处理器在全局作用域查找，
+    // 该函数却被 IIFE 封装，于是点击时抛出 ReferenceError。
+    // 修复：改为 addEventListener 在同一作用域内绑定，既保留封装又不污染 window。
+    document.getElementById('resetBtn').addEventListener('click', resetAnimation);
+    document.getElementById('pauseBtn').addEventListener('click', togglePause);
 
     window.addEventListener('resize', resize);
     resize();

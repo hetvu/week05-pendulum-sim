@@ -1,0 +1,17 @@
+故障演练页控制台证据（ReAct 闭环第 1 轮 · Observation）
+================================================================
+页面：starter_code/03_buggy_practice/index.html
+捕获方式：Edge headless + CDP Runtime.exceptionThrown（等价于 F12 Console 红字）
+捕获时间：2026-10-20T08:42:30.935Z
+
+【操作 1】点击「重置摆动」按钮
+Uncaught ReferenceError: resetAnimation is not defined
+    at onclick (file:///D:/3/week05_pendulum_sim/starter_code/03_buggy_practice/index.html:34:56)
+    at (anonymous) (:1:37)
+
+【操作 2】点击「暂停」按钮（同一根因）
+Uncaught ReferenceError: togglePause is not defined
+    at onclick (file:///D:/3/week05_pendulum_sim/starter_code/03_buggy_practice/index.html:35:67)
+    at (anonymous) (:1:37)
+
+共捕获 2 条未定义异常，页面动画本身仍在运行。
