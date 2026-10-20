@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>单摆物理模拟器 · Week05</title>
+<title>单摆 · 双摆物理模拟器 | Week05</title>
 <style>
   :root {
     color-scheme: dark;
@@ -35,24 +35,39 @@
 
   /* ---------- 顶栏 ---------- */
   .topbar {
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
     padding: 14px 24px; border-bottom: 1px solid rgba(93, 93, 130, 0.22);
     background: rgba(18, 18, 26, 0.55); backdrop-filter: blur(12px);
     flex: 0 0 auto;
   }
-  .brand { display: flex; align-items: center; gap: 13px; }
+  .brand { display: flex; align-items: center; gap: 13px; min-width: 0; }
   .logo {
     width: 40px; height: 40px; border-radius: 13px; display: grid; place-items: center;
-    font-size: 21px; color: var(--mint);
+    font-size: 21px; color: var(--mint); flex: 0 0 auto;
     background: linear-gradient(135deg, rgba(94,234,212,.16), rgba(167,139,250,.14));
     border: 1px solid rgba(94,234,212,.32);
     box-shadow: 0 0 24px rgba(94,234,212,.12), inset 0 0 16px rgba(94,234,212,.06);
   }
-  h1 { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: .03em; }
+  h1 { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: .03em; white-space: nowrap; }
   h1 .light { color: var(--muted); font-weight: 400; font-size: 11px; letter-spacing: .18em; margin-left: 10px; }
   h1 .dot { color: #4a4a68; margin: 0 4px; font-weight: 400; }
-  .sub { margin: 3px 0 0; font-size: 11px; color: var(--muted); letter-spacing: .08em; }
-  .meta { display: flex; align-items: center; gap: 16px; }
+  .sub { margin: 3px 0 0; font-size: 11px; color: var(--muted); letter-spacing: .08em; white-space: nowrap; }
+  .meta { display: flex; align-items: center; gap: 14px; }
+
+  .modes {
+    display: flex; padding: 3px; border-radius: 10px; gap: 2px;
+    background: rgba(38, 38, 56, 0.75); border: 1px solid rgba(93,93,130,.32);
+  }
+  .mode-btn {
+    border: 0; background: transparent; color: #a7a7c4; font-size: 11px; letter-spacing: .08em;
+    padding: 6px 12px; border-radius: 7px; cursor: pointer; transition: all .18s ease;
+  }
+  .mode-btn:hover { color: #e8e8f5; }
+  .mode-btn.active {
+    background: linear-gradient(135deg, rgba(94,234,212,.95), rgba(70,207,185,.95));
+    color: #04211d; font-weight: 700; box-shadow: 0 2px 12px rgba(94,234,212,.25);
+  }
+
   .student { display: flex; align-items: center; gap: 9px; }
   .avatar {
     width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
@@ -64,7 +79,7 @@
   .status {
     display: flex; align-items: center; gap: 7px; font-size: 10px; letter-spacing: .16em;
     padding: 6px 11px; border-radius: 999px; border: 1px solid rgba(94,234,212,.3);
-    color: var(--mint); background: rgba(94,234,212,.07);
+    color: var(--mint); background: rgba(94,234,212,.07); white-space: nowrap;
   }
   .status i { width: 6px; height: 6px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 8px var(--mint); }
   .status.paused { color: var(--amber); border-color: rgba(251,191,36,.35); background: rgba(251,191,36,.07); }
@@ -109,22 +124,22 @@
   }
   .stage-bottom {
     position: absolute; left: 20px; right: 20px; bottom: 16px;
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
     font-size: 11px; color: rgba(180,180,208,.62); pointer-events: none;
   }
-  .fps { font-variant-numeric: tabular-nums; letter-spacing: .1em; }
+  .fps { font-variant-numeric: tabular-nums; letter-spacing: .1em; white-space: nowrap; }
 
   /* ---------- 控制面板 ---------- */
-  .panel { min-height: 0; overflow-y: auto; padding-right: 4px; display: flex; flex-direction: column; gap: 14px; }
+  .panel { min-height: 0; overflow-y: auto; padding-right: 4px; display: flex; flex-direction: column; gap: 12px; }
   .panel::-webkit-scrollbar { width: 6px; }
   .panel::-webkit-scrollbar-thumb { background: #34344c; border-radius: 99px; }
 
   .card {
     background: linear-gradient(180deg, rgba(34,34,50,.92), rgba(25,25,37,.92));
-    border: 1px solid rgba(93,93,130,.26); border-radius: 16px; padding: 17px 18px 18px;
-    box-shadow: 0 16px 36px rgba(0,0,0,.24);
+    border: 1px solid rgba(93,93,130,.26); border-radius: 16px; padding: 14px 16px 15px;
+    box-shadow: 0 16px 36px rgba(0,0,0,.24); flex: 0 0 auto;
   }
-  .card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
   .card h2 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .12em; color: #d9d9ec; }
   .card h2::before {
     content: ""; display: inline-block; width: 3px; height: 11px; border-radius: 2px;
@@ -133,9 +148,9 @@
   }
   .live { font-size: 9px; letter-spacing: .18em; color: var(--mint); opacity: .8; }
 
-  .slider-row { --c: var(--mint); margin-bottom: 17px; }
-  .slider-row:last-of-type { margin-bottom: 19px; }
-  .slider-meta { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+  .slider-row { --c: var(--mint); margin-bottom: 13px; }
+  .slider-row:last-of-type { margin-bottom: 15px; }
+  .slider-meta { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
   .slider-meta label { font-size: 12px; color: #c6c6dc; }
   .slider-meta label span { color: var(--muted); font-size: 10px; margin-left: 5px; }
   .slider-meta output {
@@ -158,7 +173,7 @@
     width: 15px; height: 15px; border-radius: 50%; background: #f7fffd;
     border: 3px solid var(--c); box-shadow: 0 0 16px var(--c); cursor: grab;
   }
-  .scale { display: flex; justify-content: space-between; margin-top: 6px; font-size: 9px; color: #61617e; letter-spacing: .06em; }
+  .scale { display: flex; justify-content: space-between; margin-top: 3px; font-size: 9px; color: #61617e; letter-spacing: .06em; }
 
   .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
   button {
@@ -177,34 +192,56 @@
   .btn-ghost:hover { background: rgba(66,66,92,.7); border-color: rgba(94,234,212,.35); }
   button:focus-visible, input:focus-visible { outline: 2px solid var(--mint); outline-offset: 3px; }
 
-  .readings { flex: 0 0 auto; }
+  .planet-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .planet {
+    display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 10px;
+    background: rgba(38,38,56,.55); border: 1px solid rgba(93,93,130,.3);
+    color: #c2c2d8; font-size: 12px; letter-spacing: .04em; text-align: left;
+  }
+  .planet:hover { border-color: rgba(94,234,212,.3); background: rgba(46,46,68,.7); }
+  .planet i {
+    width: 9px; height: 9px; border-radius: 50%; background: var(--dot); flex: 0 0 auto;
+    box-shadow: 0 0 10px var(--dot);
+  }
+  .planet em { margin-left: auto; font-style: normal; font-size: 10px; color: #777792; font-variant-numeric: tabular-nums; }
+  .planet.active {
+    border-color: rgba(94,234,212,.5); background: rgba(94,234,212,.09); color: #ecfffb;
+    box-shadow: inset 0 0 22px rgba(94,234,212,.06);
+  }
+  .planet.active em { color: var(--mint); }
+  .preset-note { margin: 8px 0 0; font-size: 10px; color: #74748f; letter-spacing: .03em; }
+
   .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; overflow: hidden; border-radius: 10px; background: rgba(93,93,130,.18); }
-  .stat { background: #1c1c29; padding: 11px 12px 10px; }
+  .stat { background: #1c1c29; padding: 8px 11px 7px; }
   .stat span { display: block; font-size: 9px; letter-spacing: .14em; color: #74748f; }
   .stat b { display: block; margin-top: 3px; font-size: 15px; font-weight: 400; font-variant-numeric: tabular-nums; color: #e7e7f5; }
   .stat b em { font-style: normal; font-size: 9px; color: #74748f; margin-left: 3px; }
 
   .formula .eq {
-    margin: 0; padding: 13px 12px; text-align: center; border-radius: 10px;
+    margin: 0; padding: 10px; text-align: center; border-radius: 10px;
     background: rgba(18,18,26,.65); border: 1px solid rgba(93,93,130,.2);
     font-family: "Cascadia Code", Consolas, "Courier New", monospace;
-    font-size: 13px; color: #bff7ee; letter-spacing: .02em;
+    font-size: 12.5px; line-height: 1.75; color: #bff7ee; letter-spacing: .02em;
   }
-  .formula .eq-note { margin: 10px 0 0; font-size: 10px; line-height: 1.6; color: #6d6d8a; }
+  .formula .eq-note { margin: 8px 0 0; font-size: 10px; line-height: 1.65; color: #6d6d8a; }
 
+  @media (max-width: 1180px) {
+    .student { display: none; }
+  }
   @media (max-width: 980px) {
     body { overflow: auto; }
     .app { height: auto; min-height: 100dvh; }
     .layout { grid-template-columns: 1fr; }
     .stage { height: 58vh; min-height: 380px; }
     .panel { overflow: visible; }
-    .meta .student { display: none; }
   }
-  @media (max-width: 560px) {
-    .topbar { padding: 12px 14px; }
+  @media (max-width: 680px) {
+    .topbar { padding: 12px 14px; flex-wrap: wrap; }
     .layout { padding: 12px 14px 16px; }
     h1 .light { display: none; }
+    .meta { gap: 8px; }
     .status { padding: 5px 8px; font-size: 9px; }
+    .mode-btn { padding: 5px 9px; font-size: 10px; }
     .stage-top { top: 12px; left: 14px; right: 14px; }
     .readout-value { font-size: 26px; }
   }
@@ -216,11 +253,15 @@
     <div class="brand">
       <div class="logo">θ</div>
       <div>
-        <h1>单摆物理模拟器<span class="dot">·</span><span class="light">PENDULUM LAB</span></h1>
+        <h1>单摆 · 双摆物理模拟器<span class="dot">·</span><span class="light">PENDULUM LAB</span></h1>
         <p class="sub">人机协同程序设计 · Week 05 意图造物</p>
       </div>
     </div>
     <div class="meta">
+      <div class="modes" role="group" aria-label="模拟模式">
+        <button class="mode-btn active" id="modeSingleBtn" type="button" aria-pressed="true">单摆</button>
+        <button class="mode-btn" id="modeDoubleBtn" type="button" aria-pressed="false">双摆</button>
+      </div>
       <div class="student">
         <span class="avatar">胡</span>
         <div><b>胡奥</b><small>6003226005</small></div>
@@ -235,12 +276,12 @@
       <div class="stage-top">
         <div class="tag" id="modeTag">SINGLE PENDULUM</div>
         <div class="readout">
-          <span class="readout-label">ANGLE θ</span>
+          <span class="readout-label" id="angleLabel">ANGLE θ</span>
           <span class="readout-value" id="hudAngle">45.0°</span>
         </div>
       </div>
       <div class="stage-bottom">
-        <span class="hint">拖拽摆球改变角度 · Space 暂停 · R 重置</span>
+        <span class="hint" id="hintText">拖拽摆球改变角度 · Space 暂停 · R 重置 · M 切换双摆</span>
         <span class="fps" id="fps">-- FPS</span>
       </div>
     </section>
@@ -261,9 +302,9 @@
         <div class="slider-row" style="--c:#a78bfa">
           <div class="slider-meta">
             <label for="gravRange">重力 g<span>1 – 25 m/s²</span></label>
-            <output id="gravOut" for="gravRange">9.8</output>
+            <output id="gravOut" for="gravRange">9.80</output>
           </div>
-          <input id="gravRange" type="range" min="1" max="25" step="0.1" value="9.8" aria-label="重力加速度">
+          <input id="gravRange" type="range" min="1" max="25" step="0.01" value="9.8" aria-label="重力加速度">
           <div class="scale"><span>1</span><span>25</span></div>
         </div>
 
@@ -282,22 +323,42 @@
         </div>
       </section>
 
-      <section class="card readings">
+      <section class="card">
+        <div class="card-head"><h2>天体场景</h2><span class="live">GRAVITY PRESET</span></div>
+        <div class="planet-grid">
+          <button class="planet active" type="button" data-preset="earth">
+            <i style="--dot:#5ea9ff"></i><span>地球</span><em>9.8</em>
+          </button>
+          <button class="planet" type="button" data-preset="moon">
+            <i style="--dot:#c9c9dc"></i><span>月球</span><em>1.62</em>
+          </button>
+          <button class="planet" type="button" data-preset="jupiter">
+            <i style="--dot:#f2b27a"></i><span>木星</span><em>24.8</em>
+          </button>
+          <button class="planet" type="button" data-preset="space">
+            <i style="--dot:#a78bfa"></i><span>太空</span><em>1.0</em>
+          </button>
+        </div>
+        <p class="preset-note" id="presetNote">当前：地球 · g = 9.80 m/s²（滑块联动）</p>
+      </section>
+
+      <section class="card">
         <div class="card-head"><h2>物理读数</h2><span class="live">REALTIME</span></div>
         <div class="stats">
+          <div class="stat"><span>摆角 θ₁</span><b id="statTheta1">45.0<em>°</em></b></div>
+          <div class="stat"><span>摆角 θ₂</span><b id="statTheta2">—</b></div>
           <div class="stat"><span>角速度 ω</span><b id="statOmega">0.00<em>rad/s</em></b></div>
           <div class="stat"><span>小角周期 T</span><b id="statPeriod">2.84<em>s</em></b></div>
-          <div class="stat"><span>机械能 E</span><b id="statEnergy">0.00<em>J/kg</em></b></div>
+          <div class="stat"><span>机械能 E</span><b id="statEnergy">0.00<em>J</em></b></div>
           <div class="stat"><span>时间 t</span><b id="statTime">0.0<em>s</em></b></div>
         </div>
       </section>
 
       <section class="card formula">
         <h2>动力学方程</h2>
-        <p class="eq">α = −(g/L)·sin θ − k·ω</p>
-        <p class="eq-note">
-          100 px 换算为 1 m；阻尼按连续时间系数 40× 标定，使 0.010 时衰减清晰可见；
-          积分采用 1/240 s 固定步长，避免高刷屏下物理速度漂移。
+        <p class="eq" id="eqMain">α = −(g/L)·sin θ − k·ω</p>
+        <p class="eq-note" id="eqNote">
+          100 px = 1 m · 阻尼系数 40× · 1/240 s 固定步长
         </p>
       </section>
     </aside>
@@ -319,8 +380,19 @@
     maxSubSteps: 8,
     dampingGain: 40,
     ballRadius: 17,
+    ball1Radius: 13,
+    ball2Radius: 15,
     initialAngle: Math.PI / 4,
-    trailLength: 72
+    doubleInitial: { theta1: 100 * Math.PI / 180, theta2: Math.PI / 2 },
+    trailSingle: 72,
+    trailDouble: 300,
+    storageKey: 'week05.pendulum.v1',
+    presets: {
+      earth: { name: '地球', g: 9.8, dot: '#5ea9ff' },
+      moon: { name: '月球', g: 1.62, dot: '#c9c9dc' },
+      jupiter: { name: '木星', g: 24.8, dot: '#f2b27a' },
+      space: { name: '太空', g: 1.0, dot: '#a78bfa' }
+    }
   };
 
   const state = {
@@ -330,8 +402,12 @@
     k: 0,
     theta: CONFIG.initialAngle,
     omega: 0,
+    theta2: Math.PI / 2,
+    omega2: 0,
+    preset: 'earth',
     paused: false,
     dragging: false,
+    dragTarget: 0,
     time: 0,
     acc: 0,
     last: 0,
@@ -341,16 +417,30 @@
     fps: 60
   };
 
+  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+  const wrapAngle = (angle) => Math.atan2(Math.sin(angle), Math.cos(angle));
+
   /* ---------------- 画布与几何 ---------------- */
+  function recalcFit() {
+    const { w, h } = state.view;
+    state.view.cx = w / 2;
+    state.view.cy = state.mode === 'double'
+      ? clamp(h * 0.30, 120, 260)
+      : Math.max(58, Math.min(120, h * 0.15));
+    const maxTotal = state.mode === 'double' ? 350 * 1.8 : 350;
+    const cap = state.mode === 'double' ? 0.95 : 1.55;
+    state.view.fit = Math.max(0.35, Math.min(cap, (h - state.view.cy - 70) / maxTotal));
+  }
+
   function resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const rect = stage.getBoundingClientRect();
     const w = Math.max(320, Math.round(rect.width));
     const h = Math.max(320, Math.round(rect.height));
-    state.view = { w, h, dpr, cx: w / 2, cy: 0, fit: 1 };
-    state.view.cy = Math.max(58, Math.min(120, h * 0.15));
-    const avail = h - state.view.cy - 76;
-    state.view.fit = Math.min(1.55, avail / 350);
+    state.view.w = w;
+    state.view.h = h;
+    state.view.dpr = dpr;
+    recalcFit();
     canvas.width = Math.round(w * dpr);
     canvas.height = Math.round(h * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -361,10 +451,18 @@
   function geometry() {
     const { cx, cy, fit } = state.view;
     const rod = state.L * fit;
-    const theta = state.theta;
-    const bx = cx + rod * Math.sin(theta);
-    const by = cy + rod * Math.cos(theta);
-    return { cx, cy, rod, bx, by, radius: CONFIG.ballRadius };
+    if (state.mode === 'single') {
+      const bx = cx + rod * Math.sin(state.theta);
+      const by = cy + rod * Math.cos(state.theta);
+      return { cx, cy, rod, bx, by };
+    }
+    const rod1 = rod;
+    const rod2 = rod * 0.8;
+    const x1 = cx + rod1 * Math.sin(state.theta);
+    const y1 = cy + rod1 * Math.cos(state.theta);
+    const x2 = x1 + rod2 * Math.sin(state.theta2);
+    const y2 = y1 + rod2 * Math.cos(state.theta2);
+    return { cx, cy, rod1, rod2, x1, y1, x2, y2 };
   }
 
   /* ---------------- 物理 ---------------- */
@@ -376,8 +474,47 @@
     state.theta += state.omega * h;
   }
 
+  function doubleDeriv(s) {
+    const [th1, w1, th2, w2] = s;
+    const m1 = 1;
+    const m2 = 1;
+    const L1 = state.L / CONFIG.pxPerMeter;
+    const L2 = L1 * 0.8;
+    const g = state.g;
+    const d = th1 - th2;
+    const denom = 2 * m1 + m2 - m2 * Math.cos(2 * d);
+    const a1 = (
+      -g * (2 * m1 + m2) * Math.sin(th1)
+      - m2 * g * Math.sin(th1 - 2 * th2)
+      - 2 * Math.sin(d) * m2 * (w2 * w2 * L2 + w1 * w1 * L1 * Math.cos(d))
+    ) / (L1 * denom);
+    const a2 = (
+      2 * Math.sin(d) * (
+        w1 * w1 * L1 * (m1 + m2)
+        + g * (m1 + m2) * Math.cos(th1)
+        + w2 * w2 * L2 * m2 * Math.cos(d)
+      )
+    ) / (L2 * denom);
+    const damp = damping();
+    return [w1, a1 - damp * w1, w2, a2 - damp * w2];
+  }
+
+  function stepDouble(h) {
+    const s = [state.theta, state.omega, state.theta2, state.omega2];
+    const k1 = doubleDeriv(s);
+    const k2 = doubleDeriv(s.map((v, i) => v + k1[i] * h / 2));
+    const k3 = doubleDeriv(s.map((v, i) => v + k2[i] * h / 2));
+    const k4 = doubleDeriv(s.map((v, i) => v + k3[i] * h));
+    const next = s.map((v, i) => v + (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]) * h / 6);
+    state.theta = wrapAngle(next[0]);
+    state.omega = next[1];
+    state.theta2 = wrapAngle(next[2]);
+    state.omega2 = next[3];
+  }
+
   function physicsStep(h) {
-    stepSingle(h);
+    if (state.mode === 'single') stepSingle(h);
+    else stepDouble(h);
     state.time += h;
   }
 
@@ -428,45 +565,45 @@
     }
     ctx.globalAlpha = 1;
 
-    const step = 46;
+    const grid = 46;
     ctx.strokeStyle = 'rgba(88, 88, 124, 0.10)';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    for (let x = cx % step; x < w; x += step) { ctx.moveTo(x, 0); ctx.lineTo(x, h); }
-    for (let y = cy % step; y < h; y += step) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
+    for (let x = cx % grid; x < w; x += grid) { ctx.moveTo(x, 0); ctx.lineTo(x, h); }
+    for (let y = cy % grid; y < h; y += grid) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
     ctx.stroke();
   }
 
-  function drawRing(g, w, h) {
-    const { cx, cy, rod } = g;
+  function drawRing(radius, label) {
+    const { cx, cy } = state.view;
     ctx.save();
     ctx.strokeStyle = 'rgba(120, 120, 168, 0.22)';
     ctx.lineWidth = 1;
     ctx.setLineDash([3, 7]);
     ctx.beginPath();
-    ctx.arc(cx, cy, rod, 0, Math.PI * 2);
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
     ctx.stroke();
     ctx.setLineDash([]);
 
     ctx.strokeStyle = 'rgba(120, 120, 168, 0.30)';
     for (let i = 0; i < 24; i++) {
       const a = (i / 24) * Math.PI * 2;
-      const inner = rod - (i % 6 === 0 ? 9 : 4);
+      const inner = radius - (i % 6 === 0 ? 9 : 4);
       ctx.beginPath();
       ctx.moveTo(cx + Math.cos(a) * inner, cy + Math.sin(a) * inner);
-      ctx.lineTo(cx + Math.cos(a) * rod, cy + Math.sin(a) * rod);
+      ctx.lineTo(cx + Math.cos(a) * radius, cy + Math.sin(a) * radius);
       ctx.stroke();
     }
 
     ctx.fillStyle = 'rgba(141, 141, 170, 0.55)';
     ctx.font = '10px "Segoe UI", "Microsoft YaHei", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(`${state.L} px`, cx, cy + rod + 24);
+    ctx.fillText(label, cx, cy + radius + 24);
     ctx.restore();
   }
 
   function drawAngleSector(g) {
-    const { cx, cy, rod, theta } = { ...g, theta: state.theta };
+    const { cx, cy, rod } = g;
     const r = Math.min(76, Math.max(48, rod * 0.32));
     ctx.save();
     ctx.beginPath();
@@ -496,15 +633,22 @@
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
     ctx.lineCap = 'round';
-    for (let i = 1; i < pts.length; i++) {
-      const t = i / pts.length;
+    const n = pts.length;
+    const baseHue = (state.time * 24) % 360;
+    for (let i = 1; i < n; i++) {
+      const t = i / n;
       const p0 = pts[i - 1];
       const p1 = pts[i];
       ctx.beginPath();
       ctx.moveTo(p0.x, p0.y);
       ctx.lineTo(p1.x, p1.y);
-      ctx.strokeStyle = `rgba(94, 234, 212, ${0.03 + 0.24 * t})`;
-      ctx.lineWidth = 0.8 + 2.2 * t;
+      if (state.mode === 'double') {
+        ctx.strokeStyle = `hsla(${(baseHue + t * 300) % 360}, 92%, 64%, ${0.08 + 0.6 * t})`;
+        ctx.lineWidth = 1.5 + 3.5 * t;
+      } else {
+        ctx.strokeStyle = `rgba(94, 234, 212, ${0.03 + 0.24 * t})`;
+        ctx.lineWidth = 0.8 + 2.2 * t;
+      }
       ctx.stroke();
     }
     ctx.restore();
@@ -557,17 +701,23 @@
     ctx.globalCompositeOperation = 'source-over';
   }
 
-  function drawBob(x, y, r, active = true) {
+  function drawBob(x, y, r, variant = 2) {
+    const first = variant === 1;
     ctx.save();
-    if (active) {
-      ctx.shadowColor = 'rgba(94, 234, 212, 0.9)';
-      ctx.shadowBlur = 30;
-    }
+    ctx.shadowColor = first ? 'rgba(167, 139, 250, 0.85)' : 'rgba(94, 234, 212, 0.9)';
+    ctx.shadowBlur = first ? 22 : 30;
     const ball = ctx.createRadialGradient(x - r * 0.32, y - r * 0.34, r * 0.1, x, y, r);
-    ball.addColorStop(0, '#f4fffd');
-    ball.addColorStop(0.36, '#8ef6e6');
-    ball.addColorStop(0.72, '#37c9b4');
-    ball.addColorStop(1, '#0f7a6d');
+    if (first) {
+      ball.addColorStop(0, '#f6f2ff');
+      ball.addColorStop(0.36, '#d8ccff');
+      ball.addColorStop(0.72, '#a78bfa');
+      ball.addColorStop(1, '#6d4fd0');
+    } else {
+      ball.addColorStop(0, '#f4fffd');
+      ball.addColorStop(0.36, '#8ef6e6');
+      ball.addColorStop(0.72, '#37c9b4');
+      ball.addColorStop(1, '#0f7a6d');
+    }
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.fillStyle = ball;
@@ -587,19 +737,40 @@
 
     const g = geometry();
     state.geometry = g;
-    drawRing(g, w, h);
-    drawAngleSector(g);
+
+    if (state.mode === 'single') {
+      drawRing(g.rod, `${state.L} px`);
+      drawAngleSector(g);
+    } else {
+      drawRing(g.rod1 + g.rod2, `L₁ ${state.L} px · L₂ ${Math.round(state.L * 0.8)} px`);
+      drawRing(g.rod1, '');
+    }
+
     drawTrail();
-    drawRod(cx, cy, g.bx, g.by);
-    drawPivot(cx, cy);
-    drawBob(g.bx, g.by, g.radius);
+
+    if (state.mode === 'single') {
+      drawRod(cx, cy, g.bx, g.by);
+      drawPivot(cx, cy);
+      drawBob(g.bx, g.by, CONFIG.ballRadius, 2);
+    } else {
+      drawRod(cx, cy, g.x1, g.y1, 0.9);
+      drawRod(g.x1, g.y1, g.x2, g.y2, 0.95);
+      drawPivot(cx, cy);
+      drawBob(g.x1, g.y1, CONFIG.ball1Radius, 1);
+      drawBob(g.x2, g.y2, CONFIG.ball2Radius, 2);
+    }
 
     ctx.save();
     ctx.fillStyle = 'rgba(160, 160, 190, 0.5)';
     ctx.font = '10px "Cascadia Code", Consolas, monospace';
     ctx.textAlign = 'left';
-    ctx.fillText(`θ = ${(state.theta % (Math.PI * 2)).toFixed(3)} rad`, 20, h - 52);
-    ctx.fillText(`ω = ${state.omega.toFixed(3)} rad/s`, 20, h - 36);
+    if (state.mode === 'single') {
+      ctx.fillText(`θ = ${state.theta.toFixed(3)} rad`, 20, h - 52);
+      ctx.fillText(`ω = ${state.omega.toFixed(3)} rad/s`, 20, h - 36);
+    } else {
+      ctx.fillText(`θ₁ = ${(state.theta * 180 / Math.PI).toFixed(1)}°   θ₂ = ${(state.theta2 * 180 / Math.PI).toFixed(1)}°`, 20, h - 52);
+      ctx.fillText(`ω₁ = ${state.omega.toFixed(2)}   ω₂ = ${state.omega2.toFixed(2)} rad/s`, 20, h - 36);
+    }
     ctx.restore();
   }
 
@@ -613,8 +784,10 @@
       advance(dt);
       const g = state.geometry;
       if (g) {
-        state.trail.push({ x: g.bx, y: g.by });
-        if (state.trail.length > CONFIG.trailLength) state.trail.shift();
+        if (state.mode === 'single') state.trail.push({ x: g.bx, y: g.by });
+        else state.trail.push({ x: g.x2, y: g.y2 });
+        const limit = state.mode === 'single' ? CONFIG.trailSingle : CONFIG.trailDouble;
+        if (state.trail.length > limit) state.trail.shift();
       }
     }
 
@@ -631,14 +804,34 @@
     if (!force && now - lastHud < 80) return;
     lastHud = now;
 
-    const deg = state.theta * 180 / Math.PI;
-    $('hudAngle').textContent = `${deg.toFixed(1)}°`;
+    const deg1 = state.theta * 180 / Math.PI;
+    const deg2 = state.theta2 * 180 / Math.PI;
+    $('hudAngle').textContent = `${deg1.toFixed(1)}°`;
+    $('statTheta1').innerHTML = `${deg1.toFixed(1)}<em>°</em>`;
+    $('statTheta2').innerHTML = state.mode === 'double' ? `${deg2.toFixed(1)}<em>°</em>` : '—';
     $('statOmega').innerHTML = `${state.omega.toFixed(2)}<em>rad/s</em>`;
-    const period = 2 * Math.PI * Math.sqrt((state.L / CONFIG.pxPerMeter) / state.g);
+
+    const l1 = state.L / CONFIG.pxPerMeter;
+    const period = 2 * Math.PI * Math.sqrt(l1 / state.g);
     $('statPeriod').innerHTML = `${period.toFixed(2)}<em>s</em>`;
-    const l = state.L / CONFIG.pxPerMeter;
-    const energy = 0.5 * l * l * state.omega * state.omega + state.g * l * (1 - Math.cos(state.theta));
-    $('statEnergy').innerHTML = `${energy.toFixed(2)}<em>J/kg</em>`;
+
+    let energy;
+    if (state.mode === 'single') {
+      energy = 0.5 * l1 * l1 * state.omega * state.omega + state.g * l1 * (1 - Math.cos(state.theta));
+    } else {
+      const l2 = l1 * 0.8;
+      const m1 = 1;
+      const m2 = 1;
+      const v1sq = l1 * l1 * state.omega * state.omega;
+      const v2sq = l1 * l1 * state.omega * state.omega
+        + l2 * l2 * state.omega2 * state.omega2
+        + 2 * l1 * l2 * state.omega * state.omega2 * Math.cos(state.theta - state.theta2);
+      const potential = -(m1 + m2) * state.g * l1 * Math.cos(state.theta)
+        - m2 * state.g * l2 * Math.cos(state.theta2)
+        + (m1 + m2) * state.g * l1 + m2 * state.g * l2;
+      energy = 0.5 * m1 * v1sq + 0.5 * m2 * v2sq + potential;
+    }
+    $('statEnergy').innerHTML = `${energy.toFixed(2)}<em>J</em>`;
     $('statTime').innerHTML = `${state.time.toFixed(1)}<em>s</em>`;
     $('fps').textContent = `${Math.round(state.fps)} FPS`;
   }
@@ -648,7 +841,7 @@
     $('statusPill').className = 'status' + (cls ? ' ' + cls : '');
   }
 
-  /* ---------------- 交互 ---------------- */
+  /* ---------------- 滑块 ---------------- */
   function syncSliderUI(input, out, value, format) {
     const min = parseFloat(input.min);
     const max = parseFloat(input.max);
@@ -657,25 +850,140 @@
     out.textContent = format(value);
   }
 
+  const SLIDER_DEFS = {
+    L: { el: 'lenRange', out: 'lenOut', fmt: (v) => `${v.toFixed(0)} px` },
+    g: { el: 'gravRange', out: 'gravOut', fmt: (v) => v.toFixed(2) },
+    k: { el: 'dampRange', out: 'dampOut', fmt: (v) => v.toFixed(4) }
+  };
+
+  function applyGravity(value) {
+    state.g = clamp(value, 1, 25);
+    const def = SLIDER_DEFS.g;
+    const input = $(def.el);
+    input.value = state.g;
+    syncSliderUI(input, $(def.out), state.g, def.fmt);
+  }
+
+  let gTweenToken = 0;
+
   function bindSliders() {
-    const map = [
-      { el: $('lenRange'), out: $('lenOut'), key: 'L', fmt: (v) => `${v.toFixed(0)} px` },
-      { el: $('gravRange'), out: $('gravOut'), key: 'g', fmt: (v) => v.toFixed(1) },
-      { el: $('dampRange'), out: $('dampOut'), key: 'k', fmt: (v) => v.toFixed(4) }
-    ];
-    for (const item of map) {
-      const { el, out, key, fmt } = item;
-      const apply = () => {
-        const value = parseFloat(el.value);
+    for (const key of Object.keys(SLIDER_DEFS)) {
+      const def = SLIDER_DEFS[key];
+      const input = $(def.el);
+      input.value = state[key];
+      syncSliderUI(input, $(def.out), state[key], def.fmt);
+
+      input.addEventListener('input', () => {
+        const value = parseFloat(input.value);
         state[key] = value;
-        syncSliderUI(el, out, value, fmt);
+        syncSliderUI(input, $(def.out), value, def.fmt);
         if (key === 'L') state.trail.length = 0;
-      };
-      el.addEventListener('input', apply);
-      apply();
+        if (key === 'g') {
+          gTweenToken++;
+          state.preset = 'custom';
+          updatePresetUI();
+        }
+        scheduleSave();
+      });
     }
   }
 
+  /* ---------------- 天体预设 ---------------- */
+  function updatePresetUI() {
+    const isPreset = Boolean(CONFIG.presets[state.preset]);
+    document.querySelectorAll('.planet').forEach((btn) => {
+      const active = isPreset && btn.dataset.preset === state.preset;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+    const note = $('presetNote');
+    if (isPreset) {
+      const p = CONFIG.presets[state.preset];
+      note.textContent = `当前：${p.name} · g = ${p.g.toFixed(2)} m/s²（滑块联动）`;
+    } else {
+      note.textContent = `当前：自定义重力 · g = ${state.g.toFixed(2)} m/s²`;
+    }
+  }
+
+  function setPreset(key, { animate = true, save = true } = {}) {
+    const preset = CONFIG.presets[key];
+    if (!preset) return;
+    state.preset = key;
+    updatePresetUI();
+    const token = ++gTweenToken;
+
+    if (!animate) {
+      applyGravity(preset.g);
+      if (save) scheduleSave();
+    } else {
+      const from = state.g;
+      const to = preset.g;
+      const start = performance.now();
+      const duration = 620;
+      const tick = (now) => {
+        if (token !== gTweenToken) return;
+        const p = Math.min(1, (now - start) / duration);
+        const eased = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+        applyGravity(from + (to - from) * eased);
+        if (p < 1) {
+          requestAnimationFrame(tick);
+        } else {
+          applyGravity(to);
+          if (save) scheduleSave();
+        }
+      };
+      requestAnimationFrame(tick);
+    }
+  }
+
+  /* ---------------- 模式切换 ---------------- */
+  function updateModeUI() {
+    const isDouble = state.mode === 'double';
+    $('modeSingleBtn').classList.toggle('active', !isDouble);
+    $('modeDoubleBtn').classList.toggle('active', isDouble);
+    $('modeSingleBtn').setAttribute('aria-pressed', String(!isDouble));
+    $('modeDoubleBtn').setAttribute('aria-pressed', String(isDouble));
+    $('modeTag').textContent = isDouble ? 'DOUBLE PENDULUM · RK4' : 'SINGLE PENDULUM';
+    $('angleLabel').textContent = isDouble ? 'ANGLE θ₁' : 'ANGLE θ';
+    $('hintText').textContent = isDouble
+      ? '拖拽任一摆球改变姿态 · RK4 四阶积分 · Space 暂停 · R 重置 · M 单摆'
+      : '拖拽摆球改变角度 · Space 暂停 · R 重置 · M 切换双摆';
+    $('eqMain').innerHTML = isDouble
+      ? 'θ₁″ = f₁(θ₁, θ₂, ω₁, ω₂)<br>θ₂″ = f₂(θ₁, θ₂, ω₁, ω₂)'
+      : 'α = −(g/L)·sin θ − k·ω';
+    $('eqNote').textContent = isDouble
+      ? 'RK4 · 1/240 s · m₁ = m₂ = 1 kg · L₂ = 0.8 L₁'
+      : '100 px = 1 m · 阻尼系数 40× · 1/240 s 固定步长';
+    updateReadouts(true);
+  }
+
+  function setMode(mode, { save = true } = {}) {
+    if (mode !== 'single' && mode !== 'double') return;
+    if (state.mode === mode) return;
+    state.mode = mode;
+    state.time = 0;
+    state.acc = 0;
+    state.last = 0;
+    state.trail.length = 0;
+
+    if (mode === 'double') {
+      state.theta = CONFIG.doubleInitial.theta1;
+      state.theta2 = CONFIG.doubleInitial.theta2;
+      state.omega = 0;
+      state.omega2 = 0;
+    } else {
+      state.theta = clamp(state.theta, -Math.PI, Math.PI);
+      state.theta2 = Math.PI / 2;
+      state.omega = 0;
+      state.omega2 = 0;
+    }
+
+    recalcFit();
+    updateModeUI();
+    if (save) scheduleSave();
+  }
+
+  /* ---------------- 暂停 / 重置 ---------------- */
   function togglePause(force) {
     state.paused = typeof force === 'boolean' ? force : !state.paused;
     state.acc = 0;
@@ -685,7 +993,15 @@
   }
 
   function resetMotion() {
-    state.theta = CONFIG.initialAngle;
+    if (state.mode === 'double') {
+      state.theta = CONFIG.doubleInitial.theta1;
+      state.theta2 = CONFIG.doubleInitial.theta2;
+      state.omega2 = 0;
+    } else {
+      state.theta = CONFIG.initialAngle;
+      state.theta2 = Math.PI / 2;
+      state.omega2 = 0;
+    }
     state.omega = 0;
     state.acc = 0;
     state.time = 0;
@@ -694,23 +1010,33 @@
     updateReadouts(true);
   }
 
+  /* ---------------- 鼠标 / 触控拖拽 ---------------- */
   function pointerPos(event) {
     const rect = canvas.getBoundingClientRect();
     return { x: event.clientX - rect.left, y: event.clientY - rect.top };
   }
 
-  function bobHit(p) {
+  function hitBob(p) {
     const g = state.geometry;
-    if (!g) return false;
-    return Math.hypot(p.x - g.bx, p.y - g.by) <= g.radius + 16;
+    if (!g) return 0;
+    if (state.mode === 'single') {
+      return Math.hypot(p.x - g.bx, p.y - g.by) <= CONFIG.ballRadius + 16 ? 1 : 0;
+    }
+    const d1 = Math.hypot(p.x - g.x1, p.y - g.y1);
+    const d2 = Math.hypot(p.x - g.x2, p.y - g.y2);
+    if (d1 <= CONFIG.ball1Radius + 16 && d1 <= d2) return 1;
+    if (d2 <= CONFIG.ball2Radius + 16) return 2;
+    return 0;
   }
 
   function bindPointer() {
     canvas.addEventListener('pointerdown', (event) => {
-      const p = pointerPos(event);
-      if (!bobHit(p)) return;
+      const target = hitBob(pointerPos(event));
+      if (!target) return;
       state.dragging = true;
+      state.dragTarget = target;
       state.omega = 0;
+      state.omega2 = 0;
       state.acc = 0;
       state.trail.length = 0;
       canvas.classList.add('grabbing');
@@ -722,17 +1048,27 @@
     canvas.addEventListener('pointermove', (event) => {
       const p = pointerPos(event);
       if (!state.dragging) {
-        canvas.style.cursor = bobHit(p) ? 'grab' : 'default';
+        canvas.style.cursor = hitBob(p) ? 'grab' : 'default';
         return;
       }
       const g = state.geometry;
-      state.theta = Math.atan2(p.x - g.cx, p.y - g.cy);
+      if (!g) return;
+      if (state.dragTarget === 1) {
+        const next = Math.atan2(p.x - g.cx, p.y - g.cy);
+        if (state.mode === 'double') state.theta2 += next - state.theta;
+        state.theta = next;
+      } else if (state.dragTarget === 2) {
+        state.theta2 = Math.atan2(p.x - g.x1, p.y - g.y1);
+      }
       state.omega = 0;
+      state.omega2 = 0;
+      state.trail.length = 0;
     });
 
     const endDrag = (event) => {
       if (!state.dragging) return;
       state.dragging = false;
+      state.dragTarget = 0;
       state.last = 0;
       canvas.classList.remove('grabbing');
       try { canvas.releasePointerCapture(event.pointerId); } catch { /* 指针已释放 */ }
@@ -740,7 +1076,6 @@
     };
     canvas.addEventListener('pointerup', endDrag);
     canvas.addEventListener('pointercancel', endDrag);
-
     canvas.addEventListener('dblclick', () => togglePause());
   }
 
@@ -753,21 +1088,78 @@
         togglePause();
       } else if (event.key === 'r' || event.key === 'R') {
         resetMotion();
+      } else if (event.key === 'm' || event.key === 'M') {
+        setMode(state.mode === 'single' ? 'double' : 'single');
       }
     });
   }
 
+  /* ---------------- 本地持久化 ---------------- */
+  let saveTimer = 0;
+  function saveState() {
+    try {
+      localStorage.setItem(CONFIG.storageKey, JSON.stringify({
+        v: 1,
+        mode: state.mode,
+        L: state.L,
+        g: state.g,
+        k: state.k,
+        preset: state.preset
+      }));
+    } catch { /* file:// 隐私模式等场景下静默降级 */ }
+  }
+
+  function scheduleSave() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveState, 250);
+  }
+
+  function restoreState() {
+    let data = null;
+    try {
+      const raw = localStorage.getItem(CONFIG.storageKey);
+      if (raw) data = JSON.parse(raw);
+    } catch { /* 忽略损坏缓存 */ }
+    if (!data || typeof data !== 'object') return;
+
+    if (Number.isFinite(data.L)) state.L = clamp(data.L, 100, 350);
+    if (Number.isFinite(data.g)) state.g = clamp(data.g, 1, 25);
+    if (Number.isFinite(data.k)) state.k = clamp(data.k, 0, 0.01);
+    if (data.mode === 'double' || data.mode === 'single') state.mode = data.mode;
+    if (typeof data.preset === 'string') {
+      state.preset = CONFIG.presets[data.preset] ? data.preset : 'custom';
+    }
+    if (state.mode === 'double') {
+      state.theta = CONFIG.doubleInitial.theta1;
+      state.theta2 = CONFIG.doubleInitial.theta2;
+    }
+  }
+
   /* ---------------- 启动 ---------------- */
+  restoreState();
   bindSliders();
   bindPointer();
   bindKeyboard();
   $('resetBtn').addEventListener('click', resetMotion);
   $('pauseBtn').addEventListener('click', () => togglePause());
+  $('modeSingleBtn').addEventListener('click', () => setMode('single'));
+  $('modeDoubleBtn').addEventListener('click', () => setMode('double'));
+  document.querySelectorAll('.planet').forEach((btn) => {
+    btn.addEventListener('click', () => setPreset(btn.dataset.preset));
+  });
+
+  updateModeUI();
+  updatePresetUI();
 
   const observer = new ResizeObserver(() => resize());
   observer.observe(stage);
   resize();
   requestAnimationFrame(frame);
+
+  window.addEventListener('pagehide', saveState);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) saveState();
+  });
 })();
 </script>
 </body>
