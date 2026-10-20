@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>单摆物理模拟器 · Week05</title>
+<style>
+  :root { color-scheme: dark; --bg: #1a1a24; --panel: #20202e; --line: #2e2e42;
+          --text: #e9e9f4; --muted: #8f8fab; --accent: #5eead4; --violet: #a78bfa; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; background: radial-gradient(1200px 700px at 50% -10%, #26263a 0%, var(--bg) 55%);
+    color: var(--text); font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+    display: flex; flex-direction: column;
+  }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 28px; border-bottom: 1px solid var(--line);
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .logo {
+    width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center;
+    background: linear-gradient(135deg, rgba(94,234,212,.18), rgba(167,139,250,.18));
+    border: 1px solid rgba(94,234,212,.35); color: var(--accent); font-size: 20px;
+  }
+  h1 { font-size: 17px; margin: 0; letter-spacing: .04em; }
+  .sub { font-size: 11px; color: var(--muted); letter-spacing: .18em; margin-top: 3px; }
+  .chip {
+    font-size: 12px; color: var(--accent); border: 1px solid rgba(94,234,212,.3);
+    background: rgba(94,234,212,.08); padding: 5px 10px; border-radius: 999px;
+  }
+  main { flex: 1; min-height: 0; padding: 18px 28px 22px; }
+  .stage {
+    position: relative; height: 100%; min-height: 420px; border-radius: 18px; overflow: hidden;
+    background: #12121a; border: 1px solid var(--line);
+    box-shadow: 0 30px 80px rgba(0,0,0,.45), inset 0 0 120px rgba(94,234,212,.03);
+  }
+  canvas { display: block; width: 100%; height: 100%; }
+  .legend {
+    position: absolute; left: 18px; bottom: 16px; display: flex; gap: 18px;
+    font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums;
+  }
+  .legend b { color: var(--text); font-weight: 500; }
+  footer { padding: 0 28px 18px; color: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">θ</div>
+      <div>
+        <h1>单摆物理模拟器</h1>
+        <div class="sub">PENDULUM LAB · WEEK 05</div>
+      </div>
+    </div>
+    <div class="chip">MVP v0.1</div>
+  </header>
+
+  <main>
+    <div class="stage">
+      <canvas id="scene"></canvas>
+      <div class="legend">
+        <span>摆长 L <b id="statL">200</b> px</span>
+        <span>重力 g <b id="statG">9.8</b></span>
+        <span>初始摆角 <b>45°</b></span>
+      </div>
+    </div>
+  </main>
+  <footer>纯原生 Canvas · requestAnimationFrame · 单文件离线运行 · 实验者：胡奥 6003226005</footer>
+
+<script>
+(() => {
+  'use strict';
+
+  const canvas = document.getElementById('scene');
+  const ctx = canvas.getContext('2d');
+  const stage = canvas.parentElement;
+
+  const CONFIG = {
+    length: 200,          // px
+    gravity: 9.8,         // m/s²
+    damping: 0,           // 本阶段暂无阻尼
+    initialAngle: Math.PI / 4, // 45°
+    pixelsPerMeter: 100,  // 像素-米换算，保证 9.8 重力下周期约 2.8 s
+    ballRadius: 17
+  };
+
+  let theta = CONFIG.initialAngle;
+  let omega = 0;
+  let lastTime = 0;
+  let view = { w: 0, h: 0, dpr: 1 };
+
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const rect = stage.getBoundingClientRect();
+    view = { w: Math.max(rect.width, 320), h: Math.max(rect.height, 320), dpr };
+    canvas.width = Math.round(view.w * dpr);
+    canvas.height = Math.round(view.h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function physics(dt) {
+    const alpha = -(CONFIG.gravity * CONFIG.pixelsPerMeter / CONFIG.length) * Math.sin(theta)
+                  - CONFIG.damping * omega;
+    omega += alpha * dt;
+    theta += omega * dt;
+  }
+
+  function draw() {
+    const { w, h } = view;
+    const cx = w / 2;
+    const cy = Math.max(70, h * 0.16);
+    const radius = Math.max(60, Math.min(CONFIG.length, h - cy - 46));
+    const bx = cx + radius * Math.sin(theta);
+    const by = cy + radius * Math.cos(theta);
+
+    ctx.clearRect(0, 0, w, h);
+    const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(w, h) * 0.75);
+    bg.addColorStop(0, 'rgba(94, 234, 212, 0.055)');
+    bg.addColorStop(0.55, 'rgba(18, 18, 26, 0)');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, w, h);
+
+    // 极淡的参考网格
+    ctx.strokeStyle = 'rgba(84, 84, 118, 0.12)';
+    ctx.lineWidth = 1;
+    for (let x = cx % 40; x < w; x += 40) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+    }
+    for (let y = cy % 40; y < h; y += 40) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+    }
+
+    // 摆线
+    const rod = ctx.createLinearGradient(cx, cy, bx, by);
+    rod.addColorStop(0, 'rgba(167, 139, 250, 0.85)');
+    rod.addColorStop(1, 'rgba(94, 234, 212, 0.9)');
+    ctx.strokeStyle = rod;
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(bx, by); ctx.stroke();
+
+    // 悬挂点
+    ctx.beginPath(); ctx.arc(cx, cy, 7, 0, Math.PI * 2);
+    ctx.fillStyle = '#3a3a52'; ctx.fill();
+    ctx.strokeStyle = 'rgba(94, 234, 212, .45)'; ctx.lineWidth = 1.5; ctx.stroke();
+
+    // 摆球（发光）
+    ctx.save();
+    ctx.shadowColor = 'rgba(94, 234, 212, 0.85)';
+    ctx.shadowBlur = 28;
+    const ball = ctx.createRadialGradient(bx - 6, by - 6, 2, bx, by, CONFIG.ballRadius);
+    ball.addColorStop(0, '#f2fffc');
+    ball.addColorStop(0.4, '#7cf3e2');
+    ball.addColorStop(1, '#128b7d');
+    ctx.beginPath();
+    ctx.arc(bx, by, CONFIG.ballRadius, 0, Math.PI * 2);
+    ctx.fillStyle = ball;
+    ctx.fill();
+    ctx.restore();
+
+    // 角度弧与读数
+    ctx.strokeStyle = 'rgba(167, 139, 250, 0.45)';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 42, Math.PI / 2 - Math.max(theta, 0), Math.PI / 2 - Math.min(theta, 0), theta < 0);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(233, 233, 244, 0.75)';
+    ctx.font = '12px "Segoe UI", "Microsoft YaHei", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`θ = ${(theta * 180 / Math.PI).toFixed(1)}°`, cx, cy + 66);
+  }
+
+  function frame(now) {
+    if (!lastTime) lastTime = now;
+    const dt = Math.min((now - lastTime) / 1000, 0.05);
+    lastTime = now;
+    physics(dt);
+    draw();
+    requestAnimationFrame(frame);
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
