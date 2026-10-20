@@ -18,7 +18,7 @@
 
 在不手写一行纯语法代码的前提下，我用「角色 + 目标 + 约束 + 验收标准」四段式意图驱动 AI
 生成了一个纯原生 Canvas 的单摆 / 双摆物理模拟器；并用浏览器控制台的真实堆栈完成了一次
-ReAct 闭环自愈。最终应用 **0 控制台报错、稳定 60 FPS、参数可持久化**，并保留了 6 次可追溯的
+ReAct 闭环自愈。最终应用 **0 控制台报错、稳定 60 FPS、参数可持久化**，并保留了 7 次可追溯的
 Git 提交与完整证据链。
 
 ---
@@ -33,7 +33,7 @@ Git 提交与完整证据链。
 | 任务四 · 闭环自愈 | 捕获 Console 红字，ReAct 根因修复，回归验证 | ✅ 真实 `ReferenceError` → 0 报错，44.99° 复位 |
 | 进阶 A · 双摆 | RK4、彩虹渐变拖尾、鼠标拖拽 | ✅ 双摆混沌 + 300 点彩虹拖尾 + 双球拖拽 |
 | 进阶 B · 天体持久化 | 4 个天体胶囊、平滑重力、localStorage | ✅ 地球/月球/木星/太空 + 刷新恢复 |
-| 交付 · Git | ≥ 3 次清晰 Commit、push 至 GitHub、Zip 打包 | ✅ 6 次提交（见 §8）；打包见根目录 Zip |
+| 交付 · Git | ≥ 3 次清晰 Commit、push 至 GitHub、Zip 打包 | ✅ 7 次提交（见 §8）；已推送 GitHub；打包见根目录 Zip |
 
 ---
 
@@ -55,7 +55,7 @@ week05_pendulum_sim/
 │   ├── verification.md                # 自动化验收清单
 │   ├── verification-report.json       # 自动化脚本原始输出
 │   └── screenshots/                   # 01–13 号运行截图
-└── .git/                              # 6 次规范 Commit
+└── .git/                              # 7 次规范 Commit
 ```
 
 基线命令（实验第一步已实际执行）：
@@ -311,7 +311,8 @@ RK4 公式转录、localStorage 读写、无头浏览器验收脚本与截图。
 | 3 | `7a18bee` | `feat: add interactive parameter sliders and reset control` |
 | 4 | `46adde7` | `fix: resolve reset button runtime error` |
 | 5 | `58ae813` | `feat: add double pendulum RK4, celestial presets and persistence` |
-| 6 | 本次提交 | `docs: complete experiment report and human-AI reflections` |
+| 6 | `1e8d077` | `docs: complete experiment report and human-AI reflections` |
+| 7 | 本次提交 | `docs: add GitHub repository link` |
 
 查看完整历史：
 
@@ -321,19 +322,22 @@ git log --oneline --graph --decorate
 
 ---
 
-## 9. 远端同步（GitHub）
+## 9. 远端仓库（GitHub）
 
-本机实验环境未保存 GitHub 账号凭据，因此远端推送需要实验者本人授权后执行一次。本地仓库、
-提交历史与打包文件均已就绪：
+已推送至 GitHub 作品集：
+
+**<https://github.com/hetvu/week05-pendulum-sim>**
 
 ```bash
-# 在 GitHub 新建空仓库 week05-pendulum-sim 后：
-git remote add origin https://github.com/<你的GitHub用户名>/week05-pendulum-sim.git
-git push -u origin main
+$ git remote -v
+origin  https://github.com/hetvu/week05-pendulum-sim.git (fetch)
+origin  https://github.com/hetvu/week05-pendulum-sim.git (push)
 ```
 
-> 推送完成后，将本节的 `<你的GitHub用户名>` 替换为实际地址即可形成作品集链接。
-> 仓库内已包含 `.git/` 完整历史，评审者可直接 `git log` 复核 6 次提交。
+仓库为 public，包含完整 `.git` 历史与全部截图证据；克隆后双击 `index.html` 即可离线运行。
+
+> 说明：本机提交身份为 `胡奥 <6003226005@ncu.edu.cn>`，GitHub 账号 `hetvu`；
+> 评审者可直接在 GitHub 查看 7 次提交与最终文件。
 
 ---
 
