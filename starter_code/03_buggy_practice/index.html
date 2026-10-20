@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>故障演练页 · 单摆 v0.3（含 Bug）</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: grid; place-items: center;
+    background: #1a1a24; color: #e8e8f2;
+    font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+  }
+  .wrap { width: min(680px, 92vw); padding: 20px 0; }
+  h1 { font-size: 20px; margin: 0 0 6px; }
+  p.hint { margin: 0 0 14px; color: #8b8ba7; font-size: 13px; }
+  canvas { width: 100%; height: 460px; display: block; border-radius: 14px;
+           background: #12121a; border: 1px solid #2a2a3a; }
+  .bar { display: flex; gap: 12px; margin-top: 14px; }
+  button {
+    padding: 10px 20px; border: 0; border-radius: 10px; cursor: pointer;
+    background: #5eead4; color: #062a26; font-weight: 600; font-size: 14px;
+  }
+  button.ghost { background: #26263a; color: #cdcde6; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>故障演练 · 单摆 v0.3</h1>
+    <p class="hint">按 F12 打开 Console，然后点击「重置摆动」复现运行时错误。</p>
+    <canvas id="scene"></canvas>
+    <div class="bar">
+      <button id="resetBtn" onclick="resetAnimation()">重置摆动</button>
+      <button class="ghost" id="pauseBtn" onclick="togglePause()">暂停</button>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    'use strict';
+
+    const canvas = document.getElementById('scene');
+    const ctx = canvas.getContext('2d');
+    const LENGTH = 200;
+    const GRAVITY = 9.8;
+    const PX_PER_METER = 100;
+    const INITIAL_ANGLE = Math.PI / 4;
+
+    let theta = INITIAL_ANGLE;
+    let omega = 0;
+    let paused = false;
+    let lastTime = 0;
+
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function step(dt) {
+      if (paused) return;
+      const alpha = -(GRAVITY * PX_PER_METER / LENGTH) * Math.sin(theta);
+      omega += alpha * dt;
+      theta += omega * dt;
+    }
+
+    function draw() {
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      const cx = w / 2;
+      const cy = h * 0.18;
+      const bx = cx + LENGTH * Math.sin(theta);
+      const by = cy + LENGTH * Math.cos(theta);
+
+      ctx.clearRect(0, 0, w, h);
+      const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, 300);
+      glow.addColorStop(0, 'rgba(94, 234, 212, 0.08)');
+      glow.addColorStop(1, 'rgba(26, 26, 36, 0)');
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.strokeStyle = '#4a4a68';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(bx, by);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, 6, 0, Math.PI * 2);
+      ctx.fillStyle = '#8b8ba7';
+      ctx.fill();
+
+      ctx.save();
+      ctx.shadowColor = 'rgba(94, 234, 212, 0.9)';
+      ctx.shadowBlur = 24;
+      ctx.beginPath();
+      ctx.arc(bx, by, 18, 0, Math.PI * 2);
+      const ball = ctx.createRadialGradient(bx - 6, by - 6, 2, bx, by, 18);
+      ball.addColorStop(0, '#eafffb');
+      ball.addColorStop(0.45, '#5eead4');
+      ball.addColorStop(1, '#148f80');
+      ctx.fillStyle = ball;
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function frame(now) {
+      if (!lastTime) lastTime = now;
+      const dt = Math.min((now - lastTime) / 1000, 0.05);
+      lastTime = now;
+      step(dt);
+      draw();
+      requestAnimationFrame(frame);
+    }
+
+    function togglePause() {
+      paused = !paused;
+      document.getElementById('pauseBtn').textContent = paused ? '继续' : '暂停';
+    }
+
+    // 设计意图：把摆球拉回 45° 初始状态
+    // 实际作用域：函数声明被 IIFE 包裹，未挂载到 window
+    function resetAnimation() {
+      theta = INITIAL_ANGLE;
+      omega = 0;
+      lastTime = 0;
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+    requestAnimationFrame(frame);
+  })();
+  </script>
+</body>
+</html>

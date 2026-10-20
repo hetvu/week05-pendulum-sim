@@ -1,0 +1,14 @@
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs & temp
+*.log
+*.tmp
+dist/
+node_modules/
+
+# 打包产物（由实验者本地生成，不入库）
+Week05_Lab_*.zip
